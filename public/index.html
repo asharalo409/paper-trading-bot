@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paper Trading Bot</title>
+<style>
+  :root { --bg:#0f1115; --card:#181b22; --text:#e8eaf0; --muted:#8b92a5; --up:#2ecc71; --down:#ff5c5c; --line:#4da3ff; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, "Noto Sans Bengali", sans-serif; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .badge { display:inline-block; background:#3a2f12; color:#ffcc66; padding:3px 10px; border-radius:99px; font-size:12px; margin-bottom:14px; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:10px; margin-bottom:14px; }
+  .card { background:var(--card); border-radius:12px; padding:14px; }
+  .label { color:var(--muted); font-size:12px; }
+  .value { font-size:22px; font-weight:600; margin-top:4px; }
+  .up { color:var(--up); } .down { color:var(--down); }
+  svg { width:100%; height:200px; display:block; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:8px 6px; border-bottom:1px solid #262a33; }
+  th { color:var(--muted); font-weight:500; }
+  .scroll { overflow-x:auto; }
+  .err { color:var(--down); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>AI Paper Trading Bot</h1>
+  <div class="badge">শুধু নকল টাকা — আসল ট্রেড নয়</div>
+  <div id="err" class="err"></div>
+
+  <div class="grid">
+    <div class="card"><div class="label">মোট ব্যালেন্স (Equity)</div><div class="value" id="equity">–</div></div>
+    <div class="card"><div class="label">লাভ / লস</div><div class="value" id="pnl">–</div></div>
+    <div class="card"><div class="label">BTC দাম</div><div class="value" id="price">–</div></div>
+    <div class="card"><div class="label">পজিশন</div><div class="value" id="pos">–</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="label" style="margin-bottom:8px">Equity গ্রাফ</div>
+    <svg id="chart" viewBox="0 0 800 200" preserveAspectRatio="none"></svg>
+  </div>
+
+  <div class="card">
+    <div class="label" style="margin-bottom:8px">শেষ ট্রেডগুলো</div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>সময়</th><th>Side</th><th>দাম</th><th>PnL</th><th>কারণ</th></tr></thead>
+        <tbody id="trades"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <p class="label" id="updated" style="margin-top:12px"></p>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const usd = n => "$" + Number(n).toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:2});
+
+fetch("state.json?_=" + Date.now())
+  .then(r => { if (!r.ok) throw new Error("state.json পাওয়া যায়নি — বট একবার চালান"); return r.json(); })
+  .then(s => {
+    const equity = s.equity ?? s.start_cash;
+    const pnl = equity - s.start_cash;
+    $("equity").textContent = usd(equity);
+    $("pnl").textContent = (pnl >= 0 ? "+" : "") + usd(pnl) + " (" + (pnl / s.start_cash * 100).toFixed(2) + "%)";
+    $("pnl").className = "value " + (pnl >= 0 ? "up" : "down");
+    $("price").textContent = s.last_price ? usd(s.last_price) : "–";
+    $("pos").textContent = s.qty > 0 ? "LONG" : "FLAT";
+    if (s.halted_today) $("pos").textContent += " (আজ বন্ধ)";
+    $("updated").textContent = "শেষ আপডেট: " + (s.last_run || "–") + " (UTC)";
+
+    const h = s.equity_history || [];
+    if (h.length > 1) {
+      const vals = h.map(p => p.equity);
+      const min = Math.min(...vals), max = Math.max(...vals), span = (max - min) || 1;
+      const pts = vals.map((v, i) => {
+        const x = i / (vals.length - 1) * 800;
+        const y = 190 - (v - min) / span * 180;
+        return x.toFixed(1) + "," + y.toFixed(1);
+      }).join(" ");
+      $("chart").innerHTML = '<polyline fill="none" stroke="var(--line)" stroke-width="2" points="' + pts + '"/>';
+    }
+
+    const rows = (s.trades || []).slice(-15).reverse().map(t =>
+      "<tr><td>" + t.time.replace("T", " ").slice(0, 16) + "</td>" +
+      "<td class='" + (t.side === "BUY" ? "up" : "down") + "'>" + t.side + "</td>" +
+      "<td>" + usd(t.price) + "</td>" +
+      "<td>" + (t.pnl !== undefined ? (t.pnl >= 0 ? "+" : "") + t.pnl.toFixed(2) : "–") + "</td>" +
+      "<td>" + (t.reason || "") + "</td></tr>"
+    ).join("");
+    $("trades").innerHTML = rows || "<tr><td colspan='5'>এখনো কোনো ট্রেড হয়নি</td></tr>";
+  })
+  .catch(e => { $("err").textContent = e.message; });
+</script>
+</body>
+</html>
