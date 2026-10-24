@@ -1,8 +1,8 @@
 {
   "start_cash": 1000.0,
-  "cash": 0.0,
-  "qty": 0.012178236438983055,
-  "entry_price": 81900.2,
+  "cash": 963.8293548162762,
+  "qty": 0.0,
+  "entry_price": null,
   "last_signal": "DOWN",
   "day": "2026-10-24",
   "day_start_equity": 984.2998710625859,
@@ -14,6 +14,14 @@
       "price": 81900.2,
       "qty": 0.012178236438983055,
       "reason": "SMA bullish cross"
+    },
+    {
+      "time": "2026-10-24T15:54:26+00:00",
+      "side": "SELL",
+      "price": 79349.9,
+      "qty": 0.012178236438983055,
+      "pnl": -33.57,
+      "reason": "stop-loss"
     }
   ],
   "equity_history": [
@@ -51,10 +59,15 @@
       "t": "2026-10-24T12:07:50+00:00",
       "equity": 980.18,
       "price": 80486.5
+    },
+    {
+      "t": "2026-10-24T15:54:26+00:00",
+      "equity": 963.83,
+      "price": 79349.9
     }
   ],
-  "last_run": "2026-10-24T12:07:50+00:00",
-  "last_price": 80486.5,
+  "last_run": "2026-10-24T15:54:26+00:00",
+  "last_price": 79349.9,
   "note": "PAPER TRADING - fake money",
-  "equity": 980.18
+  "equity": 963.83
 }
