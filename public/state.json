@@ -3,7 +3,7 @@
   "cash": 918.9126752723607,
   "qty": 0.0,
   "entry_price": null,
-  "last_signal": "UP",
+  "last_signal": "DOWN",
   "day": "2026-11-11",
   "day_start_equity": 918.9126752723607,
   "halted_today": false,
@@ -484,10 +484,15 @@
       "t": "2026-11-11T08:24:36+00:00",
       "equity": 918.91,
       "price": 74026.6
+    },
+    {
+      "t": "2026-11-11T16:25:49+00:00",
+      "equity": 918.91,
+      "price": 74103.5
     }
   ],
-  "last_run": "2026-11-11T08:24:36+00:00",
-  "last_price": 74026.6,
+  "last_run": "2026-11-11T16:25:49+00:00",
+  "last_price": 74103.5,
   "note": "PAPER TRADING - fake money",
   "equity": 918.91
 }
